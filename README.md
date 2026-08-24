@@ -53,7 +53,7 @@ O servidor Node entrega o frontend compilado e a API no mesmo domínio. Para con
 5. Em **Settings → Networking**, escolha **Generate Domain**.
 6. Confirme que o healthcheck `/api/health` fica saudável.
 
-O `railway.json` já configura o build (`npm ci && npm run build`) e o arranque (`npm start`). Use apenas uma réplica enquanto a aplicação usar SQLite.
+O `railway.json` já configura o build (`npm run build`) e o arranque (`npm start`). O Railpack instala as dependências antes de executar o build; não adicione outro `npm ci` ao Build Command. Use apenas uma réplica enquanto a aplicação usar SQLite.
 
 Na Vercel, o frontend pode ser alojado normalmente, mas este backend não deve usar um ficheiro SQLite local porque o sistema de ficheiros das Functions não é armazenamento persistente. Para alojar tudo na Vercel, migre a base para Turso/libSQL ou Neon Postgres e transforme as rotas `/api` em Vercel Functions.
 
