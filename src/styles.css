@@ -52,6 +52,7 @@ button { color: inherit; }
 }
 .site-nav a:hover { color: var(--ink); }
 .site-nav a[aria-current="page"] { border-color: var(--ink); color: var(--ink); }
+.external-link-mark { margin-left: 2px; font-size: 11px; }
 
 main { overflow: hidden; }
 .hero {
@@ -331,8 +332,8 @@ footer { display: flex; justify-content: space-between; gap: 24px; max-width: 14
 @media (max-width: 700px) {
   .site-header { align-items: flex-start; flex-direction: column; padding: 18px 20px; }
   .brand-mark { width: 45px; height: 45px; }
-  .site-nav { width: 100%; }
-  .site-nav a { flex: 1; padding: 10px 4px; text-align: center; }
+  .site-nav { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); width: 100%; }
+  .site-nav a { padding: 10px 4px; text-align: center; }
   .hero { min-height: 510px; padding: 70px 20px 48px; }
   .hero h1 { font-size: clamp(56px, 20vw, 92px); }
   .hero-copy { margin: 38px 0 0; }

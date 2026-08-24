@@ -20,6 +20,20 @@ export function SiteHeader({ currentPage }: SiteHeaderProps) {
         <a href="/presencas" aria-current={currentPage === "attendances" ? "page" : undefined}>
           Jogos a que fui
         </a>
+        <a
+          href="https://smartfan.tickets/aacademica-oaf-futebol"
+          target="_blank"
+          rel="noreferrer"
+        >
+          Bilhetes <span className="external-link-mark" aria-hidden="true">↗</span>
+        </a>
+        <a
+          href="https://smartfan.tickets/aacademica-oaf-quotas"
+          target="_blank"
+          rel="noreferrer"
+        >
+          Quotas <span className="external-link-mark" aria-hidden="true">↗</span>
+        </a>
       </nav>
     </header>
   );
