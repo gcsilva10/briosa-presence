@@ -346,7 +346,7 @@ export function listAttendedMatches(): MatchRow[] {
     LEFT JOIN clubs AS home_club ON home_club.id = home_alias.club_id
     LEFT JOIN club_aliases AS away_alias ON away_alias.alias = matches.away_team
     LEFT JOIN clubs AS away_club ON away_club.id = away_alias.club_id
-    ORDER BY matches.season DESC, matches.match_date ASC, matches.competition_name ASC
+    ORDER BY matches.season DESC, matches.match_date DESC, matches.competition_name ASC
   `).all() as unknown as RawMatchRow[];
 
   return toMatchRows(rows);
