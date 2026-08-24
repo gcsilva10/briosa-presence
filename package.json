@@ -1,0 +1,33 @@
+{
+  "name": "briosa-presence",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "dev": "tsx server/index.ts",
+    "build": "tsc -b && vite build",
+    "start": "NODE_ENV=production node --import tsx server/index.ts",
+    "preview": "NODE_ENV=production tsx server/index.ts",
+    "import:data": "tsx scripts/import-matches.ts",
+    "import:clubs": "tsx scripts/import-club-badges.ts",
+    "import:details": "node --import tsx scripts/import-match-details.ts",
+    "check": "tsc -b && vite build"
+  },
+  "dependencies": {
+    "@vitejs/plugin-react": "latest",
+    "cheerio": "latest",
+    "react": "latest",
+    "react-dom": "latest",
+    "tsx": "latest",
+    "vite": "latest"
+  },
+  "devDependencies": {
+    "@types/node": "latest",
+    "@types/react": "latest",
+    "@types/react-dom": "latest",
+    "typescript": "latest"
+  }
+}
