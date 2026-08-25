@@ -19,6 +19,14 @@ O site fica disponível em `http://localhost:5173`.
 
 Os jogos e as presenças são guardados em `data/briosa.sqlite`. O importador consulta as páginas públicas de época do TheSportsDB e do Transfermarkt, filtra a Académica e atualiza os registos existentes sem criar duplicados. A importação cobre Primeira Liga, Segunda Liga, Liga 3, Taça de Portugal, Taça da Liga, Liga Europa e Supertaça desde 2011/12. Voltar a importar ou sincronizar jogos não apaga as presenças já marcadas.
 
+As classificações do campeonato também ficam guardadas na base de dados. Para importar ou atualizar todas as épocas:
+
+```bash
+npm run import:standings
+```
+
+Para atualizar apenas uma época, use `npm run import:standings -- --season=2024-2025`. Na Liga 3 é apresentada a fase final em que a Académica participou; quando essa fase ainda não existe, é mostrada a Série B da primeira fase.
+
 Os clubes, aliases e referências aos emblemas também ficam guardados na base de dados. Os ficheiros são descarregados para `public/media/clubs` para o site não depender da API em cada visita. O importador é idempotente e respeita o limite da API gratuita:
 
 ```bash
@@ -27,7 +35,7 @@ npm run import:clubs
 
 Use `npm run import:clubs -- --refresh` apenas quando quiser voltar a consultar todos os clubes. O modo `--rebuild` recria somente o catálogo de clubes, preservando jogos e presenças.
 
-Sempre que o frontend é aberto, `POST /api/sync/current` verifica novamente a época atual. Novos jogos são inseridos e alterações de datas, estados ou resultados atualizam o registo existente. A mesma sincronização atualiza também as fichas relevantes: jogos novos, os três próximos jogos e jogos recentemente terminados cuja ficha ainda esteja incompleta. As fichas são atualizadas no máximo quatro de cada vez e respeitam uma cache de 12 horas. Pedidos simultâneos são agrupados e existe uma proteção de 60 segundos entre verificações do calendário.
+Sempre que o frontend é aberto, `POST /api/sync/current` verifica novamente a época atual. Novos jogos são inseridos e alterações de datas, estados ou resultados atualizam o registo existente. A mesma sincronização atualiza a classificação e também as fichas relevantes: jogos novos, os três próximos jogos e jogos recentemente terminados cuja ficha ainda esteja incompleta. As fichas são atualizadas no máximo quatro de cada vez e respeitam uma cache de 12 horas; a classificação tem uma cache de uma hora. Pedidos simultâneos são agrupados e existe uma proteção de 60 segundos entre verificações do calendário.
 
 ```bash
 npm run import:data
@@ -37,6 +45,7 @@ API local:
 
 - `GET /api/seasons`
 - `GET /api/matches?season=2026-2027`
+- `GET /api/standings?season=2026-2027`
 - `GET /api/attendances`
 - `PUT /api/matches/:id/attendance` com `{ "attended": true | false }`
 - `GET /api/health`
@@ -44,7 +53,7 @@ API local:
 
 ## Deploy recomendado: Railway
 
-O servidor Node entrega o frontend compilado e a API no mesmo domínio. Para conservar o SQLite entre deploys, o projeto aceita `DATABASE_PATH`; quando o volume está vazio, copia automaticamente a base de dados incluída no repositório como ponto de partida.
+O servidor Node entrega o frontend compilado e a API no mesmo domínio. Para conservar o SQLite entre deploys, o projeto aceita `DATABASE_PATH`; quando o volume está vazio, copia automaticamente a base de dados incluída no repositório como ponto de partida. Nos volumes que já existem, as novas classificações históricas incluídas no projeto são acrescentadas sem substituir jogos, presenças ou classificações mais recentes.
 
 1. Envie o repositório para o GitHub.
 2. No Railway, crie um projeto com **Deploy from GitHub repo** e escolha este repositório.

@@ -71,3 +71,29 @@ export interface MatchDetailResponse {
   };
   events: MatchEvent[];
 }
+
+export interface StandingRow {
+  position: number;
+  teamId: string | null;
+  teamName: string;
+  badgeUrl: string | null;
+  played: number;
+  wins: number;
+  draws: number;
+  losses: number;
+  goalsFor: number;
+  goalsAgainst: number;
+  goalDifference: number;
+  points: number;
+  isAcademica: boolean;
+}
+
+export interface Standing {
+  season: string;
+  competitionId: string;
+  competitionName: string;
+  stageName: string;
+  sourceUrl: string;
+  fetchedAt: string;
+  rows: StandingRow[];
+}

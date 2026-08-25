@@ -16,6 +16,17 @@
 }
 
 * { box-sizing: border-box; }
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
 html { scroll-behavior: smooth; }
 body { margin: 0; min-width: 320px; min-height: 100vh; }
 button, input, select { font: inherit; }
@@ -132,6 +143,29 @@ main { overflow: hidden; }
 .summary-stats div:last-child { border-right: 0; }
 .summary-stats dt { margin-top: 4px; color: #8f9089; font-size: 10px; text-transform: uppercase; letter-spacing: .14em; }
 .summary-stats dd { margin: 0; font-size: 24px; font-weight: 600; letter-spacing: -.04em; }
+
+.standings-section { margin: 0 0 54px; border: 1px solid var(--dark-line); background: #171815; }
+.standings-heading { display: flex; align-items: end; justify-content: space-between; gap: 24px; padding: 25px 28px; border-bottom: 1px solid var(--dark-line); }
+.standings-heading .eyebrow { margin-bottom: 6px; }
+.standings-heading h3 { margin: 0; font-size: 30px; letter-spacing: -.04em; }
+.standings-heading > span { color: #a2a39c; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .12em; }
+.standings-scroll { overflow-x: auto; }
+.standings-scroll:focus-visible { outline: 2px solid white; outline-offset: -2px; }
+.standings-table { width: 100%; min-width: 680px; border-collapse: collapse; font-size: 12px; font-variant-numeric: tabular-nums; }
+.standings-table caption { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; }
+.standings-table th, .standings-table td { height: 51px; padding: 9px 14px; border-bottom: 1px solid #2d2e2a; text-align: center; }
+.standings-table thead th { height: 40px; color: #878881; font-size: 9px; text-transform: uppercase; letter-spacing: .12em; }
+.standings-table th:nth-child(2), .standings-table tbody th { text-align: left; }
+.standings-table tbody th { display: flex; align-items: center; gap: 11px; min-width: 230px; font-size: 13px; }
+.standings-table tbody th img, .standing-badge-placeholder { width: 27px; height: 27px; flex: 0 0 auto; object-fit: contain; }
+.standing-badge-placeholder { border: 1px solid #494a45; border-radius: 50%; }
+.standings-table tbody tr:last-child th, .standings-table tbody tr:last-child td { border-bottom: 0; }
+.standings-table tbody tr.is-academica { color: #fff; background: rgba(73, 161, 107, .16); }
+.standings-table tbody tr.is-academica th { font-weight: 700; }
+.standings-table tbody tr:not(.is-academica):hover { background: #1d1e1b; }
+.standings-source { margin: 0; padding: 13px 28px; border-top: 1px solid var(--dark-line); text-align: right; }
+.standings-source a { color: #85867f; font-size: 9px; font-weight: 700; text-decoration: none; text-transform: uppercase; letter-spacing: .1em; }
+.standings-source a:hover { color: #d7d8d0; }
 
 .matches-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
 .match-card {
@@ -343,6 +377,8 @@ footer { display: flex; justify-content: space-between; gap: 24px; max-width: 14
   .summary-primary { border-right: 0; border-bottom: 1px solid var(--dark-line); }
   .summary-stats { grid-template-columns: repeat(5, minmax(80px, 1fr)); overflow-x: auto; }
   .summary-stats div { padding: 18px 14px; }
+  .standings-heading { align-items: flex-start; flex-direction: column; padding: 22px 18px; }
+  .standings-source { padding-right: 18px; }
   .matches-grid { grid-template-columns: 1fr; }
   .match-card-grid { min-height: 320px; }
   .attendance-heading { margin-bottom: 56px; }

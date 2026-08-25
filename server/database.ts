@@ -109,6 +109,33 @@ database.exec(`
   CREATE INDEX IF NOT EXISTS idx_match_events_match
     ON match_events (match_id, sort_order);
 
+  CREATE TABLE IF NOT EXISTS standings_meta (
+    season TEXT PRIMARY KEY,
+    competition_id TEXT NOT NULL,
+    competition_name TEXT NOT NULL,
+    stage_name TEXT NOT NULL,
+    source_url TEXT NOT NULL,
+    fetched_at TEXT NOT NULL
+  );
+
+  CREATE TABLE IF NOT EXISTS standings (
+    season TEXT NOT NULL,
+    position INTEGER NOT NULL,
+    team_id TEXT,
+    team_name TEXT NOT NULL,
+    badge_url TEXT,
+    played INTEGER NOT NULL,
+    wins INTEGER NOT NULL,
+    draws INTEGER NOT NULL,
+    losses INTEGER NOT NULL,
+    goals_for INTEGER NOT NULL,
+    goals_against INTEGER NOT NULL,
+    goal_difference INTEGER NOT NULL,
+    points INTEGER NOT NULL,
+    PRIMARY KEY (season, position),
+    FOREIGN KEY (season) REFERENCES standings_meta(season) ON DELETE CASCADE
+  );
+
   UPDATE matches
   SET home_team = 'Académica de Coimbra'
   WHERE home_team LIKE 'Associação Académica de C%';
@@ -126,6 +153,31 @@ database.exec(`
   WHERE away_team = 'Academica';
 
 `);
+
+// Railway keeps its database on a persistent volume. Seed newly bundled
+// historical standings without replacing any data already stored there.
+if (databasePath !== bundledDatabasePath && existsSync(bundledDatabasePath)) {
+  try {
+    database.prepare("ATTACH DATABASE ? AS bundled_seed").run(bundledDatabasePath);
+    try {
+      database.exec(`
+        BEGIN;
+        INSERT OR IGNORE INTO standings_meta
+        SELECT * FROM bundled_seed.standings_meta;
+        INSERT OR IGNORE INTO standings
+        SELECT * FROM bundled_seed.standings;
+        COMMIT;
+      `);
+    } catch (error) {
+      database.exec("ROLLBACK");
+      throw error;
+    } finally {
+      database.exec("DETACH DATABASE bundled_seed");
+    }
+  } catch (error) {
+    console.warn("Não foi possível inicializar as classificações históricas:", error);
+  }
+}
 
 export const teamName = "Académica de Coimbra";
 
@@ -181,6 +233,22 @@ export interface MatchEventRow {
   score: string | null;
   detail: string | null;
   sortOrder: number;
+}
+
+export interface StandingRow {
+  position: number;
+  teamId: string | null;
+  teamName: string;
+  badgeUrl: string | null;
+  played: number;
+  wins: number;
+  draws: number;
+  losses: number;
+  goalsFor: number;
+  goalsAgainst: number;
+  goalDifference: number;
+  points: number;
+  isAcademica: boolean;
 }
 
 interface RawMatchRow extends Omit<MatchRow, "attended"> {
@@ -319,6 +387,56 @@ export function getMatchDetails(matchId: string) {
       away: lineups.filter(({ teamSide }) => teamSide === "away"),
     },
     events,
+  };
+}
+
+export function getStanding(season: string) {
+  const meta = database.prepare(`
+    SELECT
+      season,
+      competition_id AS competitionId,
+      competition_name AS competitionName,
+      stage_name AS stageName,
+      source_url AS sourceUrl,
+      fetched_at AS fetchedAt
+    FROM standings_meta
+    WHERE season = ?
+  `).get(season) as unknown as {
+    season: string;
+    competitionId: string;
+    competitionName: string;
+    stageName: string;
+    sourceUrl: string;
+    fetchedAt: string;
+  } | undefined;
+
+  if (!meta) return null;
+
+  const rows = database.prepare(`
+    SELECT
+      standings.position,
+      standings.team_id AS teamId,
+      standings.team_name AS teamName,
+      COALESCE(clubs.badge_path, clubs.badge_url, standings.badge_url) AS badgeUrl,
+      standings.played,
+      standings.wins,
+      standings.draws,
+      standings.losses,
+      standings.goals_for AS goalsFor,
+      standings.goals_against AS goalsAgainst,
+      standings.goal_difference AS goalDifference,
+      standings.points,
+      CASE WHEN standings.team_id = '2990' OR standings.team_name LIKE 'Académica%' THEN 1 ELSE 0 END AS isAcademica
+    FROM standings
+    LEFT JOIN club_aliases ON club_aliases.alias = standings.team_name
+    LEFT JOIN clubs ON clubs.id = club_aliases.club_id
+    WHERE standings.season = ?
+    ORDER BY standings.position ASC
+  `).all(season) as unknown as Array<Omit<StandingRow, "isAcademica"> & { isAcademica: number }>;
+
+  return {
+    ...meta,
+    rows: rows.map((row) => ({ ...row, isAcademica: Boolean(row.isAcademica) })),
   };
 }
 

@@ -5,6 +5,7 @@ import { fileURLToPath } from "node:url";
 import {
   getMatch,
   getMatchDetails,
+  getStanding,
   listAttendedMatches,
   listMatches,
   listSeasons,
@@ -63,6 +64,25 @@ const handleApi = async (request: IncomingMessage, response: ServerResponse) => 
 
   if (url.pathname === "/api/seasons") {
     json(response, { seasons: listSeasons() });
+    return true;
+  }
+
+  if (url.pathname === "/api/standings") {
+    if (request.method !== "GET") {
+      json(response, { error: "Método não permitido." }, 405);
+      return true;
+    }
+    const season = url.searchParams.get("season");
+    if (!season || !/^\d{4}-\d{4}$/.test(season)) {
+      json(response, { error: "É necessária uma época válida." }, 400);
+      return true;
+    }
+    const standing = getStanding(season);
+    if (!standing) {
+      json(response, { error: "Classificação não encontrada para esta época." }, 404);
+      return true;
+    }
+    json(response, { standing });
     return true;
   }
 

@@ -2,6 +2,7 @@ import { load } from "cheerio";
 import { ensureClubBadge } from "./clubs.ts";
 import { database, teamName } from "./database.ts";
 import { syncCurrentSeasonDetails } from "./currentDetailsSync.ts";
+import { syncSeasonStanding } from "./standingsSync.ts";
 
 const teamId = "134118";
 const sourceBaseUrl = "https://www.thesportsdb.com";
@@ -44,6 +45,7 @@ export interface SyncResult {
   updated: number;
   detailsChecked: number;
   detailsUpdated: number;
+  standingUpdated: boolean;
   cached: boolean;
   warnings: string[];
 }
@@ -204,6 +206,8 @@ async function performSync(): Promise<SyncResult> {
 
   const detailsResult = await syncCurrentSeasonDetails(season);
   warnings.push(...detailsResult.warnings);
+  const standingResult = await syncSeasonStanding(season);
+  if (standingResult.warning) warnings.push(`Classificação: ${standingResult.warning}`);
 
   lastResult = {
     season,
@@ -213,6 +217,7 @@ async function performSync(): Promise<SyncResult> {
     updated,
     detailsChecked: detailsResult.checked,
     detailsUpdated: detailsResult.updated,
+    standingUpdated: standingResult.updated,
     cached: false,
     warnings,
   };

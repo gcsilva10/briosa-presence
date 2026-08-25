@@ -14,6 +14,7 @@
     "import:data": "tsx scripts/import-matches.ts",
     "import:clubs": "tsx scripts/import-club-badges.ts",
     "import:details": "node --import tsx scripts/import-match-details.ts",
+    "import:standings": "node --import tsx scripts/import-standings.ts",
     "check": "tsc -b && vite build"
   },
   "dependencies": {

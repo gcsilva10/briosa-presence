@@ -4,9 +4,10 @@ import { CompetitionSelector } from "../components/CompetitionSelector";
 import { MatchList } from "../components/MatchList";
 import { SeasonSelector } from "../components/SeasonSelector";
 import { SeasonSummary } from "../components/SeasonSummary";
+import { StandingsTable } from "../components/StandingsTable";
 import { saveAttendance } from "../lib/attendance";
 import { apiUrl } from "../lib/api";
-import type { Match, SeasonSummary as SeasonSummaryData } from "../types";
+import type { Match, SeasonSummary as SeasonSummaryData, Standing } from "../types";
 
 interface ArchivePageProps {
   syncStatus: SyncStatus;
@@ -17,6 +18,7 @@ export function ArchivePage({ syncStatus }: ArchivePageProps) {
   const [selectedSeason, setSelectedSeason] = useState("");
   const [selectedCompetition, setSelectedCompetition] = useState("all");
   const [matches, setMatches] = useState<Match[]>([]);
+  const [standing, setStanding] = useState<Standing | null>(null);
   const [updatingMatchId, setUpdatingMatchId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -49,15 +51,23 @@ export function ArchivePage({ syncStatus }: ArchivePageProps) {
     const controller = new AbortController();
     setIsLoading(true);
     setError(null);
+    setStanding(null);
 
-    async function loadMatches() {
+    async function loadSeason() {
       try {
-        const response = await fetch(apiUrl(`/api/matches?season=${encodeURIComponent(selectedSeason)}`), {
-          signal: controller.signal,
-        });
-        if (!response.ok) throw new Error("Não foi possível carregar os jogos.");
-        const data = await response.json() as { matches: Match[] };
-        setMatches(data.matches);
+        const seasonQuery = encodeURIComponent(selectedSeason);
+        const [matchesResponse, standingResponse] = await Promise.all([
+          fetch(apiUrl(`/api/matches?season=${seasonQuery}`), { signal: controller.signal }),
+          fetch(apiUrl(`/api/standings?season=${seasonQuery}`), { signal: controller.signal }),
+        ]);
+        if (!matchesResponse.ok) throw new Error("Não foi possível carregar os jogos.");
+        const matchesData = await matchesResponse.json() as { matches: Match[] };
+        setMatches(matchesData.matches);
+
+        if (standingResponse.ok) {
+          const standingData = await standingResponse.json() as { standing: Standing };
+          setStanding(standingData.standing);
+        }
       } catch (reason) {
         if (reason instanceof DOMException && reason.name === "AbortError") return;
         setError(reason instanceof Error ? reason.message : "Ocorreu um erro inesperado.");
@@ -66,7 +76,7 @@ export function ArchivePage({ syncStatus }: ArchivePageProps) {
       }
     }
 
-    void loadMatches();
+    void loadSeason();
     return () => controller.abort();
   }, [selectedSeason]);
 
@@ -140,6 +150,8 @@ export function ArchivePage({ syncStatus }: ArchivePageProps) {
         </div>
 
         {selectedSummary ? <SeasonSummary summary={selectedSummary} /> : null}
+
+        <StandingsTable standing={standing} />
 
         {error ? <p className="error-state" role="alert">{error}</p> : null}
         {isLoading ? <p className="loading-state" aria-live="polite">A carregar os jogos…</p> : null}
