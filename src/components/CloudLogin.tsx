@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { isCloudConfigured, isSignedIn, signIn, signOut } from "../lib/cloud";
+import { isCloudConfigured, isSignedIn, signIn, signOut, importRecoveredAttendances } from "../lib/cloud";
 
 export function CloudLogin() {
   const [logged, setLogged] = useState(isSignedIn);
@@ -10,6 +10,23 @@ export function CloudLogin() {
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const configured = isCloudConfigured();
+  const [recoveryOpen, setRecoveryOpen] = useState(false);
+  const [recoveryStatus, setRecoveryStatus] = useState("");
+  const [recovering, setRecovering] = useState(false);
+  async function recover(event: React.ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    setRecovering(true); setRecoveryStatus("");
+    try {
+      const data: unknown = JSON.parse(await file.text());
+      if (!data || typeof data !== "object" || !("format" in data) || data.format !== "briosa-attendances-v1" || !("matchIds" in data) || !Array.isArray(data.matchIds) || !data.matchIds.every(id => typeof id === "string")) {
+        throw new Error("Ficheiro de recuperação inválido.");
+      }
+      const count = await importRecoveredAttendances(data.matchIds);
+      setRecoveryStatus(`${count} presenças importadas/verificadas. As já existentes foram mantidas.`);
+    } catch (error) { setRecoveryStatus(error instanceof Error ? error.message : "Falha na importação."); }
+    finally { setRecovering(false); event.target.value = ""; }
+  }
 
   async function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -55,5 +72,6 @@ export function CloudLogin() {
           <button className="account-submit" type="submit" disabled={busy}>{busy ? "A entrar…" : "Entrar na minha conta →"}</button>
         </form>}
     </div>}
+    {logged && <div className="account-recovery"><button className="account-recovery-toggle" type="button" aria-expanded={recoveryOpen} onClick={() => setRecoveryOpen(open => !open)}>Recuperar presenças antigas {recoveryOpen ? "−" : "+"}</button>{recoveryOpen && <div className="account-recovery-form"><p>Importa um ficheiro JSON criado com <code>npm run recover:attendances</code>. As presenças existentes não são apagadas.</p><label htmlFor="recovery-file">Selecionar ficheiro de recuperação</label><input id="recovery-file" type="file" accept=".json,application/json" disabled={recovering} onChange={recover} />{recoveryStatus && <p role="status">{recoveryStatus}</p>}</div>}</div>}
   </section>;
 }
