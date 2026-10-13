@@ -7,6 +7,7 @@ import { SeasonSummary } from "../components/SeasonSummary";
 import { StandingsTable } from "../components/StandingsTable";
 import { saveAttendance } from "../lib/attendance";
 import { apiUrl } from "../lib/api";
+import { attendedIds, isSignedIn } from "../lib/cloud";
 import type { Match, SeasonSummary as SeasonSummaryData, Standing } from "../types";
 
 interface ArchivePageProps {
@@ -29,7 +30,7 @@ export function ArchivePage({ syncStatus }: ArchivePageProps) {
 
     async function loadSeasons() {
       try {
-        const response = await fetch(apiUrl("/api/seasons"), { signal: controller.signal });
+        const response = await fetch(apiUrl("/data/seasons.json"), { signal: controller.signal });
         if (!response.ok) throw new Error("Não foi possível carregar as épocas.");
         const data = await response.json() as { seasons: SeasonSummaryData[] };
         setSeasons(data.seasons);
@@ -57,12 +58,13 @@ export function ArchivePage({ syncStatus }: ArchivePageProps) {
       try {
         const seasonQuery = encodeURIComponent(selectedSeason);
         const [matchesResponse, standingResponse] = await Promise.all([
-          fetch(apiUrl(`/api/matches?season=${seasonQuery}`), { signal: controller.signal }),
-          fetch(apiUrl(`/api/standings?season=${seasonQuery}`), { signal: controller.signal }),
+          fetch(apiUrl(`/data/matches/${seasonQuery}.json`), { signal: controller.signal }),
+          fetch(apiUrl(`/data/standings/${seasonQuery}.json`), { signal: controller.signal }),
         ]);
         if (!matchesResponse.ok) throw new Error("Não foi possível carregar os jogos.");
         const matchesData = await matchesResponse.json() as { matches: Match[] };
-        setMatches(matchesData.matches);
+        const ids = isSignedIn() ? await attendedIds() : new Set<string>();
+        setMatches(matchesData.matches.map(match => ({ ...match, attended: ids.has(match.id) })));
 
         if (standingResponse.ok) {
           const standingData = await standingResponse.json() as { standing: Standing };
