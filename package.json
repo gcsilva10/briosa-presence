@@ -8,12 +8,13 @@
   },
   "scripts": {
     "dev": "tsx server/index.ts",
-    "build": "tsc -b && vite build",
+    "build": "npm run export:static && tsc -b && vite build",
     "start": "NODE_ENV=production node --import tsx server/index.ts",
     "preview": "NODE_ENV=production tsx server/index.ts",
     "import:data": "tsx scripts/import-matches.ts",
     "import:clubs": "tsx scripts/import-club-badges.ts",
     "import:details": "node --import tsx scripts/import-match-details.ts",
+    "export:static": "tsx scripts/export-static.ts",
     "import:standings": "node --import tsx scripts/import-standings.ts",
     "check": "tsc -b && vite build"
   },
