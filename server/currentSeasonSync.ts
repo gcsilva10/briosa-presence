@@ -113,6 +113,32 @@ async function fetchCompetition(season: string, competition: (typeof competition
     });
   });
 
+  if (matches.length === 0) {
+    // TheSportsDB sometimes changes its server-rendered season HTML.
+    // Try its documented structured endpoint instead of silently keeping stale results.
+    const api = new URL("https://www.thesportsdb.com/api/v1/json/3/eventsseason.php");
+    api.searchParams.set("id", competition.id);
+    api.searchParams.set("s", season);
+    const fallbackResponse = await fetch(api);
+    if (!fallbackResponse.ok) throw new Error(`API TheSportsDB: HTTP ${fallbackResponse.status}`);
+    const payload = await fallbackResponse.json() as { events?: Array<Record<string, string | null>> | null };
+    for (const event of payload.events ?? []) {
+      if (event.idHomeTeam !== teamId && event.idAwayTeam !== teamId) continue;
+      if (!event.idEvent || !event.dateEvent) continue;
+      const homeScore = event.intHomeScore == null ? null : Number(event.intHomeScore);
+      const awayScore = event.intAwayScore == null ? null : Number(event.intAwayScore);
+      matches.push({
+        id: `thesportsdb:${event.idEvent}`, season,
+        competitionId: competition.id, competitionName: competition.name,
+        round: event.intRound ?? null, date: event.dateEvent,
+        homeTeam: normalizeTeamName(event.strHomeTeam ?? ""),
+        awayTeam: normalizeTeamName(event.strAwayTeam ?? ""),
+        homeScore, awayScore,
+        status: homeScore === null || awayScore === null ? "scheduled" : "finished",
+        sourceUrl: `https://www.thesportsdb.com/event/${event.idEvent}`,
+      });
+    }
+  }
   return matches;
 }
 
