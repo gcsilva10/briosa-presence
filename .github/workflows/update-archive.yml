@@ -15,9 +15,8 @@ jobs:
           node-version: "24"
           cache: npm
       - run: npm ci
-      - run: npm run import:data
-      - run: npm run import:standings
-      - run: npm run import:clubs
+      # Refresh only the current season; historical scraping is a separate maintenance task.
+      - run: npm run sync:current
       - run: npm run export:static
       - run: npm run check
       - name: Commit data and images only if changed
