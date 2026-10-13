@@ -13,14 +13,14 @@ export function CloudLogin() {
     setBusy(true); setError("");
     try {
       await signIn(email, password);
-      setPassword(""); setLogged(true);
+      setPassword(""); setLogged(true); window.location.reload();
     } catch (reason) { setError(reason instanceof Error ? reason.message : "Falha no login."); }
     finally { setBusy(false); }
   }
   if (!configured) return <aside className="cloud-login"><p>Sincronização por configurar pelo administrador.</p></aside>;
   return <aside className="cloud-login" aria-label="Sincronização das presenças">
     {logged ? <div><span>Presenças sincronizadas com a tua conta.</span>{" "}
-      <button type="button" onClick={() => { signOut(); setLogged(false); }}>Terminar sessão</button></div>
+      <button type="button" onClick={() => { signOut(); setLogged(false); window.location.reload(); }}>Terminar sessão</button></div>
       : <form onSubmit={submit}>
         <span>Inicia sessão para teres os mesmos jogos no PC e no telemóvel.</span>{" "}
         <input type="email" autoComplete="email" placeholder="Email" aria-label="Email" required value={email} onChange={event => setEmail(event.target.value)} />{" "}
