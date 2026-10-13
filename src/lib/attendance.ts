@@ -1,11 +1,4 @@
-import { apiUrl } from "./api";
-
+import { updateAttendance } from "./cloud";
 export async function saveAttendance(matchId: string, attended: boolean) {
-  const response = await fetch(apiUrl(`/api/matches/${encodeURIComponent(matchId)}/attendance`), {
-    method: "PUT",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ attended }),
-  });
-
-  if (!response.ok) throw new Error("Não foi possível guardar a presença.");
+  await updateAttendance(matchId, attended);
 }
