@@ -8,7 +8,7 @@ import { CloudLogin } from "./components/CloudLogin";
 export type SyncStatus = "checking" | "current" | "unavailable";
 
 export function App() {
-  const [syncStatus, setSyncStatus] = useState<SyncStatus>("current");
+  const [syncStatus, setSyncStatus] = useState<SyncStatus>("unavailable");
   const path = window.location.pathname.replace(/\/$/, "") || "/";
   const isAttendancesPage = path === "/presencas";
   const matchRoute = path.match(/^\/jogos\/(.+)$/);

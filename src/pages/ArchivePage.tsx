@@ -128,8 +128,8 @@ export function ArchivePage({ syncStatus }: ArchivePageProps) {
             <h2 id="archive-title">Jogos por época</h2>
             <p className={`sync-status ${syncStatus}`} aria-live="polite">
               {syncStatus === "checking" ? "A atualizar calendário e fichas da época atual…" : null}
-              {syncStatus === "current" ? "Calendário e fichas atuais verificados" : null}
-              {syncStatus === "unavailable" ? "Arquivo disponível · atualização temporariamente indisponível" : null}
+              {syncStatus === "current" ? "Arquivo carregado · atualização automática não confirmada" : null}
+              {syncStatus === "unavailable" ? "Arquivo disponível · atualização de resultados por verificar" : null}
             </p>
           </div>
 

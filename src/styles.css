@@ -409,3 +409,34 @@ footer { display: flex; justify-content: space-between; gap: 24px; max-width: 14
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
 }
+
+
+/* Briosa account access: compact status header and accessible expanded login. */
+.account-bar { position: relative; z-index: 5; border-bottom: 1px solid #30312b; background: #181916; color: #eeeee5; }
+.account-bar-inner { max-width: 1440px; margin: 0 auto; padding: 14px 48px; display: flex; align-items: center; justify-content: space-between; gap: 22px; }
+.account-copy { display: flex; align-items: center; gap: 14px; min-width: 0; }
+.account-copy > div { display: flex; flex-direction: column; gap: 4px; }
+.account-copy strong { font-size: 12px; letter-spacing: .03em; }
+.account-copy span:not(.account-icon) { color: #a0a198; font-size: 11px; line-height: 1.5; }
+.account-icon { flex: none; width: 36px; height: 36px; border: 1px solid #56584a; border-radius: 50%; display: grid; place-items: center; color: #d4c398; }
+.account-button { flex: none; border: 1px solid #a6a799; background: transparent; color: #f8f8ee; border-radius: 6px; padding: 11px 16px; cursor: pointer; font: inherit; font-size: 12px; font-weight: 700; }
+.account-button span { padding-left: 12px; }
+.account-button:hover, .account-button:focus-visible { background: #30332c; }
+.account-logout { border-color: #474941; color: #d1d2c8; }
+.account-panel { display: grid; grid-template-columns: 1fr 1fr; gap: 64px; width: min(100% - 96px, 1050px); margin: 0 auto; padding: 35px 0 42px; border-top: 1px solid #35372f; }
+.account-panel-heading h2 { font-size: clamp(32px, 4vw, 56px); letter-spacing: -.055em; margin: 10px 0 12px; }
+.account-panel-heading p { color: #9d9e95; font-size: 13px; max-width: 300px; line-height: 1.7; }
+.account-form { display: flex; flex-direction: column; gap: 10px; }
+.account-form label { font-size: 11px; font-weight: 700; color: #dadbd1; }
+.account-form > input, .account-password input { box-sizing: border-box; width: 100%; min-height: 46px; border: 1px solid #4a4d44; border-radius: 5px; background: #22241f; padding: 10px 13px; color: #f5f5ec; font: inherit; font-size: 13px; }
+.account-form > input:focus, .account-password input:focus { outline: 2px solid #b3b992; outline-offset: 2px; }
+.account-password { display: flex; align-items: center; gap: 10px; }
+.account-password button { border: 0; background: transparent; color: #c6c7bc; cursor: pointer; }
+.account-submit { margin-top: 12px; background: #e7e6da; color: #1a1b17; border: 0; border-radius: 5px; padding: 14px; font-weight: 800; cursor: pointer; }
+.account-submit:disabled { opacity: .5; cursor: wait; }
+@media (max-width: 700px) {
+ .account-bar-inner { padding: 13px 20px; gap: 12px; }
+ .account-copy span:not(.account-icon) { display: none; }
+ .account-button { padding: 10px 11px; }
+ .account-panel { width: calc(100% - 40px); grid-template-columns: 1fr; gap: 18px; padding: 28px 0 32px; }
+}

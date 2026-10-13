@@ -91,3 +91,20 @@ export async function updateAttendance(matchId: string, attended: boolean) {
     }, accessToken);
   }
 }
+
+/** Add recovered IDs for the signed-in user without deleting existing records. */
+export async function importRecoveredAttendances(matchIds: string[]): Promise<number> {
+  const unique = [...new Set(matchIds.filter(id => typeof id === "string" && id.length > 0))];
+  const accessToken = await token();
+  const userResponse = await request("/auth/v1/user", {}, accessToken);
+  const user = await userResponse.json() as { id: string };
+  for (let start = 0; start < unique.length; start += 100) {
+    const batch = unique.slice(start, start + 100).map(match_id => ({ user_id: user.id, match_id }));
+    await request("/rest/v1/attendances?on_conflict=user_id,match_id", {
+      method: "POST",
+      headers: { Prefer: "resolution=ignore-duplicates,return=minimal" },
+      body: JSON.stringify(batch),
+    }, accessToken);
+  }
+  return unique.length;
+}
