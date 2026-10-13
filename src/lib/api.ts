@@ -1,11 +1,8 @@
-const configuredApiUrl = import.meta.env.VITE_API_URL?.trim().replace(/\/$/, "") ?? "";
-
 export function apiUrl(path: string) {
-  const normalizedPath = path.startsWith("/") ? path : `/${path}`;
-  return `${configuredApiUrl}${normalizedPath}`;
+  // Archive is generated into public/data during the build.
+  return path;
 }
-
-export function backendAssetUrl(path: string | null) {
-  if (!path || !configuredApiUrl || !path.startsWith("/media/")) return path;
-  return `${configuredApiUrl}${path}`;
+export function backendAssetUrl(path: string | null) { return path; }
+export async function archiveFetch(path: string, options?: RequestInit) {
+  return fetch(path, options);
 }
