@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { MatchList } from "../components/MatchList";
 import { saveAttendance } from "../lib/attendance";
 import { apiUrl } from "../lib/api";
+import { attendedIds, isSignedIn } from "../lib/cloud";
 import type { Match } from "../types";
 
 const formatSeason = (season: string) => season.replace("-", "/");
@@ -17,10 +18,17 @@ export function AttendancesPage() {
 
     async function loadAttendances() {
       try {
-        const response = await fetch(apiUrl("/api/attendances"), { signal: controller.signal });
-        if (!response.ok) throw new Error("Não foi possível carregar as presenças.");
-        const data = await response.json() as { matches: Match[] };
-        setMatches(data.matches);
+        if (!isSignedIn()) { setMatches([]); return; }
+        const ids = await attendedIds();
+        const seasonsRes = await fetch(apiUrl("/data/seasons.json"), { signal: controller.signal });
+        if (!seasonsRes.ok) throw new Error("Não foi possível carregar as épocas.");
+        const seasonsData = await seasonsRes.json() as { seasons: Array<{ season: string }> };
+        const matchesData = await Promise.all(seasonsData.seasons.map(async ({ season }) => {
+          const response = await fetch(apiUrl(`/data/matches/${season}.json`), { signal: controller.signal });
+          if (!response.ok) throw new Error("Não foi possível carregar os jogos.");
+          return (await response.json() as { matches: Match[] }).matches;
+        }));
+        setMatches(matchesData.flat().filter(match => ids.has(match.id)).map(match => ({ ...match, attended: true })));
       } catch (reason) {
         if (reason instanceof DOMException && reason.name === "AbortError") return;
         setError(reason instanceof Error ? reason.message : "Ocorreu um erro inesperado.");
