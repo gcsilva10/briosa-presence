@@ -56,7 +56,7 @@ export function MatchDetailPage({ matchId }: MatchDetailPageProps) {
     const controller = new AbortController();
     async function loadDetails() {
       try {
-        const response = await fetch(apiUrl(`/api/matches/${encodeURIComponent(matchId)}`), { signal: controller.signal });
+        const response = await fetch(apiUrl(`/data/details/${encodeURIComponent(matchId)}.json`), { signal: controller.signal });
         if (!response.ok) throw new Error(response.status === 404 ? "Jogo não encontrado." : "Não foi possível carregar a ficha.");
         setData(await response.json() as MatchDetailResponse);
       } catch (reason) {
